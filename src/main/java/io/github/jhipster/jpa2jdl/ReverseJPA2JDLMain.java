@@ -108,27 +108,28 @@ public class ReverseJPA2JDLMain {
 	    generatePagination(jdl, e);
 	}
 	for(Class<?> e : entitySubClasses) {
-	    generateDtoServices(jdl, e);
+	    generateDto(jdl, e);
 	}
+	for(Class<?> e : entitySubClasses) {
+        generateServices(jdl, e);
+    }
 	
 	System.out.println(jdl);
     }
-
-    private void generatePagination(StringBuilder out, Class<?> e) {
-	String entityClassName = e.getSimpleName();
-	out.append("paginate " + entityClassName + " with pagination\n");
-	out.append("\n");
+    private void genreateOption(final String prefix, final String suffix, final StringBuilder out, final Class<?> e) {
+        final String entityClassName = e.getSimpleName();
+        out.append(prefix + " " + entityClassName + " " + suffix + "\n");
     }
-    
-    private void generateDtoServices(StringBuilder out, Class<?> e) {
-	String entityClassName = e.getSimpleName();
-	out.append("dto " + entityClassName + " with mapstruct\n");
-	out.append("service " + entityClassName + " with serviceClass\n");
-	out.append("\n");
+    public void generatePagination(StringBuilder out, Class<?> e) {
+        genreateOption("paginate", "with pager", out, e);
     }
-    
-    
-    protected void generateEnum2Jdl(StringBuilder out, Class<?> e) {
+    public void generateServices(StringBuilder out, Class<?> e) {
+        genreateOption("service", "with serviceClass", out, e);
+    }
+    public void generateDto(final StringBuilder out, final Class<?> e) {
+        genreateOption("dto", "with mapstruct", out, e);
+    }
+    public void generateEnum2Jdl(StringBuilder out, Class<?> e) {
 	String entityClassName = e.getSimpleName();
 	boolean firstField = true;
 	out.append("enum " + entityClassName + " {\n");
@@ -149,8 +150,8 @@ public class ReverseJPA2JDLMain {
 	out.append("\n");
 	out.append("}\n\n");
     }
-    
-    protected void generateClass2Jdl(StringBuilder out, StringBuilder relationShips,  Class<?> e) {
+
+    public void generateClass2Jdl(StringBuilder out, StringBuilder relationShips,  Class<?> e) {
 	String entityClassName = e.getSimpleName();
 	boolean firstField = true;
 	out.append("entity " + entityClassName + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
@@ -257,16 +258,8 @@ public class ReverseJPA2JDLMain {
 	out.append("\n");
 	out.append("}\n\n");
     }
-    
-    
-    
-    /**
-     * Get the underlying class for a type, or null if the type is a variable type.
-     *
-     * @param type the type
-     * @return the underlying class
-     */
-    public static Class<?> typeToClass(Type type) {
+
+    private static Class<?> typeToClass(Type type) {
         if (type instanceof Class) {
             return (Class<?>) type;
         } else if (type instanceof ParameterizedType) {
@@ -283,55 +276,4 @@ public class ReverseJPA2JDLMain {
             return null;
         }
     }
-
-    /**
-     * Get the actual type arguments a child class has used to extend a generic base class.
-     *
-     * @param baseClass the base class
-     * @param childClass the child class
-     * @return a list of the raw classes for the actual type arguments.
-     */
-    public static <T> List<Class<?>> getTypeArguments(Class<T> baseClass, Class<? extends T> childClass) {
-        Map<Type, Type> resolvedTypes = new HashMap<Type, Type>();
-        Type type = childClass;
-        // start walking up the inheritance hierarchy until we hit baseClass
-        while (!typeToClass(type).equals(baseClass)) {
-            if (type instanceof Class) {
-                // there is no useful information for us in raw types, so just keep going.
-                type = ((Class<?>) type).getGenericSuperclass();
-            } else {
-                ParameterizedType parameterizedType = (ParameterizedType) type;
-                Class<?> rawType = (Class<?>) parameterizedType.getRawType();
-
-                Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-                TypeVariable<?>[] typeParameters = rawType.getTypeParameters();
-                for (int i = 0; i < actualTypeArguments.length; i++) {
-                    resolvedTypes.put(typeParameters[i], actualTypeArguments[i]);
-                }
-
-                if (!rawType.equals(baseClass)) {
-                    type = rawType.getGenericSuperclass();
-                }
-            }
-        }
-
-        // finally, for each actual type argument provided to baseClass, determine (if possible)
-        // the raw class for that type argument.
-        Type[] actualTypeArguments;
-        if (type instanceof Class) {
-            actualTypeArguments = ((Class<?>) type).getTypeParameters();
-        } else {
-            actualTypeArguments = ((ParameterizedType) type).getActualTypeArguments();
-        }
-        List<Class<?>> typeArgumentsAsClasses = new ArrayList<Class<?>>();
-        // resolve types by chasing down type variables.
-        for (Type baseType : actualTypeArguments) {
-            while (resolvedTypes.containsKey(baseType)) {
-                baseType = resolvedTypes.get(baseType);
-            }
-            typeArgumentsAsClasses.add(typeToClass(baseType));
-        }
-        return typeArgumentsAsClasses;
-    }
-
 }

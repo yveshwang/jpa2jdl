@@ -7,3 +7,5 @@ target
 *.swp
 build/
 .gradle/
+*.iml
+.idea/
