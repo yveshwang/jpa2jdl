@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.lang.reflect.*;
 import java.util.Collection;
 import java.util.Set;
@@ -83,6 +85,30 @@ public class ReverseJPA2JDL {
                 continue;
             }
             boolean required = false;
+            int min = -1;
+            int max = -1;
+            if( f.getDeclaredAnnotation(NotNull.class) != null) {
+                required = true;
+            }
+            final Size size = f.getDeclaredAnnotation(Size.class);
+            if (size != null) {
+                if( size.max() < Integer.MAX_VALUE) {
+                    max = size.max();
+                }
+                if (size.min() > 0) {
+                    min = size.min();
+                }
+            }
+            final Column col = f.getDeclaredAnnotation(Column.class);
+            if( col != null) {
+                if(!col.nullable()) {
+                    required = true;
+                }
+                if( col.length() > 0 && f.getType().getSimpleName().equals("String") && col.length() != 255) {
+                    //XXX: yves 23.06.2017, 255 is the default value for length
+                    max = col.length();
+                }
+            }
             String relationType = null;
             Class<?> targetEntityClass = null;
             boolean fromMany = false;
@@ -157,7 +183,9 @@ public class ReverseJPA2JDL {
                 } else {
                     out.append(",\n");
                 }
-                out.append("  " + fieldName + " " + f.getType().getSimpleName());
+                out.append("  " + fieldName + " " + f.getType().getSimpleName() + (required ? " required" : "")
+                        + ( (min > -1) ? " minlength(" + min + ")" : "")
+                        + ( (max > -1) ? " maxlength(" + max + ")" : ""));
             }
         }
         out.append("\n");
