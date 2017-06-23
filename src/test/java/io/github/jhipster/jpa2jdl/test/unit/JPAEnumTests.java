@@ -1,4 +1,4 @@
-package com.wordpress.macyves.test.unit;
+package io.github.jhipster.jpa2jdl.test.unit;
 
 import io.github.jhipster.jpa2jdl.ReverseJPA2JDLMain;
 import org.junit.Assert;

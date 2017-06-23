@@ -1,4 +1,4 @@
-package com.wordpress.macyves.test.unit.entities;
+package io.github.jhipster.jpa2jdl.test.unit.entities;
 
 import javax.persistence.Access;
 import javax.persistence.Entity;

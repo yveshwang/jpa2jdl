@@ -1,6 +1,6 @@
-package com.wordpress.macyves.test.unit;
+package io.github.jhipster.jpa2jdl.test.unit;
 
-import com.wordpress.macyves.test.unit.entities.SimpleEntity;
+import io.github.jhipster.jpa2jdl.test.unit.entities.SimpleEntity;
 import io.github.jhipster.jpa2jdl.ReverseJPA2JDLMain;
 import org.junit.Assert;
 import org.junit.Before;
