@@ -1,6 +1,6 @@
-package io.github.jhipster.jpa2jdl.test.unit.entities.bugtracker;
+package io.github.jhipster.jpa2jdl.example.entities.bugtracker;
 
-import io.github.jhipster.jpa2jdl.test.unit.entities.User;
+import io.github.jhipster.jpa2jdl.example.entities.User;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 

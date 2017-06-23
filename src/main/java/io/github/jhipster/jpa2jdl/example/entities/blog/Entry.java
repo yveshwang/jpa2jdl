@@ -1,4 +1,4 @@
-package io.github.jhipster.jpa2jdl.test.unit.entities.blog;
+package io.github.jhipster.jpa2jdl.example.entities.blog;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;

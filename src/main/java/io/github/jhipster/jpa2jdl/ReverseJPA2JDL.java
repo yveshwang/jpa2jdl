@@ -76,12 +76,13 @@ public class ReverseJPA2JDL {
             if (f.isSynthetic() || Modifier.isStatic(f.getModifiers())) {
                 continue;
             }
-            // Annotation[] fieldAnnotations = f.getDeclaredAnnotations();
-
             if (f.getDeclaredAnnotation(Transient.class) != null) {
                 continue;
             }
-
+            if (f.getDeclaredAnnotation(Id.class) != null) {
+                continue;
+            }
+            boolean required = false;
             String relationType = null;
             Class<?> targetEntityClass = null;
             boolean fromMany = false;

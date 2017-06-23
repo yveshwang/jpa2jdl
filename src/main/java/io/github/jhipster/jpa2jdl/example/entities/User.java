@@ -1,4 +1,4 @@
-package io.github.jhipster.jpa2jdl.test.unit.entities;
+package io.github.jhipster.jpa2jdl.example.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.BatchSize;

@@ -1,4 +1,4 @@
-package io.github.jhipster.jpa2jdl.test.unit.entities.onlineshop;
+package io.github.jhipster.jpa2jdl.example.entities.onlineshop;
 
 /**
  * The CategoryStatus enumeration.

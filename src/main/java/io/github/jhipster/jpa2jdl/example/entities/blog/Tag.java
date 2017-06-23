@@ -1,21 +1,23 @@
-package io.github.jhipster.jpa2jdl.test.unit.entities.blog;
+package io.github.jhipster.jpa2jdl.example.entities.blog;
 
-import io.github.jhipster.jpa2jdl.test.unit.entities.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Objects;
 
 /**
- * A Blog.
+ * A Tag.
  */
 @Entity
-@Table(name = "blog")
+@Table(name = "tag")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Blog implements Serializable {
+public class Tag implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,17 +27,14 @@ public class Blog implements Serializable {
     private Long id;
 
     @NotNull
-    @Size(min = 3)
+    @Size(min = 2)
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotNull
-    @Size(min = 2)
-    @Column(name = "handle", nullable = false)
-    private String handle;
-
-    @ManyToOne
-    private User user;
+    @ManyToMany(mappedBy = "tags")
+    @JsonIgnore
+    @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
+    private Set<Entry> entries = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -49,7 +48,7 @@ public class Blog implements Serializable {
         return name;
     }
 
-    public Blog name(String name) {
+    public Tag name(String name) {
         this.name = name;
         return this;
     }
@@ -58,30 +57,29 @@ public class Blog implements Serializable {
         this.name = name;
     }
 
-    public String getHandle() {
-        return handle;
+    public Set<Entry> getEntries() {
+        return entries;
     }
 
-    public Blog handle(String handle) {
-        this.handle = handle;
+    public Tag entries(Set<Entry> entries) {
+        this.entries = entries;
         return this;
     }
 
-    public void setHandle(String handle) {
-        this.handle = handle;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public Blog user(User user) {
-        this.user = user;
+    public Tag addEntry(Entry entry) {
+        this.entries.add(entry);
+        entry.getTags().add(this);
         return this;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public Tag removeEntry(Entry entry) {
+        this.entries.remove(entry);
+        entry.getTags().remove(this);
+        return this;
+    }
+
+    public void setEntries(Set<Entry> entries) {
+        this.entries = entries;
     }
 
     @Override
@@ -92,11 +90,11 @@ public class Blog implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Blog blog = (Blog) o;
-        if (blog.getId() == null || getId() == null) {
+        Tag tag = (Tag) o;
+        if (tag.getId() == null || getId() == null) {
             return false;
         }
-        return Objects.equals(getId(), blog.getId());
+        return Objects.equals(getId(), tag.getId());
     }
 
     @Override
@@ -106,10 +104,9 @@ public class Blog implements Serializable {
 
     @Override
     public String toString() {
-        return "Blog{" +
+        return "Tag{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
-            ", handle='" + getHandle() + "'" +
             "}";
     }
 }

@@ -1,4 +1,4 @@
-package io.github.jhipster.jpa2jdl.test.unit.entities.blog;
+package io.github.jhipster.jpa2jdl.example.entities.bugtracker;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Cache;
@@ -12,12 +12,12 @@ import java.util.Set;
 import java.util.Objects;
 
 /**
- * A Tag.
+ * A Label.
  */
 @Entity
-@Table(name = "tag")
+@Table(name = "label")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Tag implements Serializable {
+public class Label implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,14 +27,14 @@ public class Tag implements Serializable {
     private Long id;
 
     @NotNull
-    @Size(min = 2)
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Size(min = 3)
+    @Column(name = "jhi_label", nullable = false)
+    private String label;
 
-    @ManyToMany(mappedBy = "tags")
+    @ManyToMany(mappedBy = "labels")
     @JsonIgnore
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-    private Set<Entry> entries = new HashSet<>();
+    private Set<Ticket> tickets = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -44,42 +44,42 @@ public class Tag implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getLabel() {
+        return label;
     }
 
-    public Tag name(String name) {
-        this.name = name;
+    public Label label(String label) {
+        this.label = label;
         return this;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
-    public Set<Entry> getEntries() {
-        return entries;
+    public Set<Ticket> getTickets() {
+        return tickets;
     }
 
-    public Tag entries(Set<Entry> entries) {
-        this.entries = entries;
+    public Label tickets(Set<Ticket> tickets) {
+        this.tickets = tickets;
         return this;
     }
 
-    public Tag addEntry(Entry entry) {
-        this.entries.add(entry);
-        entry.getTags().add(this);
+    public Label addTicket(Ticket ticket) {
+        this.tickets.add(ticket);
+        ticket.getLabels().add(this);
         return this;
     }
 
-    public Tag removeEntry(Entry entry) {
-        this.entries.remove(entry);
-        entry.getTags().remove(this);
+    public Label removeTicket(Ticket ticket) {
+        this.tickets.remove(ticket);
+        ticket.getLabels().remove(this);
         return this;
     }
 
-    public void setEntries(Set<Entry> entries) {
-        this.entries = entries;
+    public void setTickets(Set<Ticket> tickets) {
+        this.tickets = tickets;
     }
 
     @Override
@@ -90,11 +90,11 @@ public class Tag implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Tag tag = (Tag) o;
-        if (tag.getId() == null || getId() == null) {
+        Label label = (Label) o;
+        if (label.getId() == null || getId() == null) {
             return false;
         }
-        return Objects.equals(getId(), tag.getId());
+        return Objects.equals(getId(), label.getId());
     }
 
     @Override
@@ -104,9 +104,9 @@ public class Tag implements Serializable {
 
     @Override
     public String toString() {
-        return "Tag{" +
+        return "Label{" +
             "id=" + getId() +
-            ", name='" + getName() + "'" +
+            ", label='" + getLabel() + "'" +
             "}";
     }
 }

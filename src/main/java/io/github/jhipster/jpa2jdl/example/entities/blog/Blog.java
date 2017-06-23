@@ -1,19 +1,21 @@
-package io.github.jhipster.jpa2jdl.test.unit.entities.bugtracker;
+package io.github.jhipster.jpa2jdl.example.entities.blog;
 
+import io.github.jhipster.jpa2jdl.example.entities.User;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
- * A Project.
+ * A Blog.
  */
 @Entity
-@Table(name = "project")
+@Table(name = "blog")
 @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
-public class Project implements Serializable {
+public class Blog implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -22,8 +24,18 @@ public class Project implements Serializable {
     @SequenceGenerator(name = "sequenceGenerator")
     private Long id;
 
-    @Column(name = "name")
+    @NotNull
+    @Size(min = 3)
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @NotNull
+    @Size(min = 2)
+    @Column(name = "handle", nullable = false)
+    private String handle;
+
+    @ManyToOne
+    private User user;
 
     public Long getId() {
         return id;
@@ -37,13 +49,39 @@ public class Project implements Serializable {
         return name;
     }
 
-    public Project name(String name) {
+    public Blog name(String name) {
         this.name = name;
         return this;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getHandle() {
+        return handle;
+    }
+
+    public Blog handle(String handle) {
+        this.handle = handle;
+        return this;
+    }
+
+    public void setHandle(String handle) {
+        this.handle = handle;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Blog user(User user) {
+        this.user = user;
+        return this;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     @Override
@@ -54,11 +92,11 @@ public class Project implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Project project = (Project) o;
-        if (project.getId() == null || getId() == null) {
+        Blog blog = (Blog) o;
+        if (blog.getId() == null || getId() == null) {
             return false;
         }
-        return Objects.equals(getId(), project.getId());
+        return Objects.equals(getId(), blog.getId());
     }
 
     @Override
@@ -68,9 +106,10 @@ public class Project implements Serializable {
 
     @Override
     public String toString() {
-        return "Project{" +
+        return "Blog{" +
             "id=" + getId() +
             ", name='" + getName() + "'" +
+            ", handle='" + getHandle() + "'" +
             "}";
     }
 }

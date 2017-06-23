@@ -1,9 +1,8 @@
 package io.github.jhipster.jpa2jdl.example.entities;
 
-import javax.persistence.Access;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import static javax.persistence.AccessType.FIELD;
 import static javax.persistence.GenerationType.SEQUENCE;
@@ -18,6 +17,19 @@ public class SimpleEntity {
     private Long id;
     private int blah;
     private String text;
+
+    @NotNull
+    @Size(max = 10)
+    @Column(name = "postcode", length = 10, nullable = false)
+    private String postcode;
+
+    public String getPostcode() {
+        return postcode;
+    }
+
+    public void setPostcode(String postcode) {
+        this.postcode = postcode;
+    }
 
     public String getText() {
         return text;
