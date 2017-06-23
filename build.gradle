@@ -1,8 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'maven'
-// apply plugin: 'pmd'
+apply plugin: 'pmd'
 apply plugin: 'idea'
-// apply plugin: 'findbugs'
+apply plugin: 'findbugs'
 
 group = 'com.wordpress.macyves.tools'
 version = '0.0.1-SNAPSHOT'

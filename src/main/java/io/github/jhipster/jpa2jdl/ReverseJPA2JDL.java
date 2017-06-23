@@ -126,17 +126,15 @@ public class ReverseJPA2JDL {
                     targetEntityClass = typeToClass(fieldType);
                 }
 
-                if (toMany && targetEntityClass != null) {
-                    if (Collection.class.isAssignableFrom(targetEntityClass)) {
-                        final Class<?> compType = targetEntityClass.getComponentType();
-                        if (compType != null) {
-                            targetEntityClass = compType;
-                        } else {
-                            final Type fieldGenericType = f.getGenericType();
-                            if (fieldGenericType instanceof ParameterizedType) {
-                                final ParameterizedType pt = (ParameterizedType) fieldGenericType;
-                                targetEntityClass = typeToClass(pt.getActualTypeArguments()[0]);
-                            }
+                if (toMany && targetEntityClass != null && Collection.class.isAssignableFrom(targetEntityClass)) {
+                    final Class<?> compType = targetEntityClass.getComponentType();
+                    if (compType != null) {
+                        targetEntityClass = compType;
+                    } else {
+                        final Type fieldGenericType = f.getGenericType();
+                        if (fieldGenericType instanceof ParameterizedType) {
+                            final ParameterizedType pt = (ParameterizedType) fieldGenericType;
+                            targetEntityClass = typeToClass(pt.getActualTypeArguments()[0]);
                         }
                     }
                 }
