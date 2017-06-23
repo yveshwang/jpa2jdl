@@ -1,5 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'pmd'
+apply plugin: 'idea'
+apply plugin: 'findbugs'
 
 group = 'com.wordpress.macyves.tools'
 version = '0.0.1-SNAPSHOT'
@@ -35,7 +38,7 @@ task('prep') {
             println execute.args
         } else {
             println 'No args supplied.'
-            println 'Usage: gradle execute -Dargs=\'--packageName=blahblah\''
+            println 'Usage: gradle execute -Dargs=\'--packageName=io.github.jhipster.jpa2jdl.example.entities\''
             execute.enabled = false            
         }
     }	
