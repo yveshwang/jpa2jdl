@@ -1,7 +1,7 @@
 package io.github.jhipster.jpa2jdl.test.unit;
 
-import io.github.jhipster.jpa2jdl.test.unit.entities.SimpleEntity;
-import io.github.jhipster.jpa2jdl.ReverseJPA2JDLMain;
+import io.github.jhipster.jpa2jdl.example.entities.SimpleEntity;
+import io.github.jhipster.jpa2jdl.ReverseJPA2JDL;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import org.junit.Test;
  * Created by yveshwang on 22/06/2017.
  */
 public class JDLOptionTests {
-    private final ReverseJPA2JDLMain parser = new ReverseJPA2JDLMain();
+    private final ReverseJPA2JDL parser = new ReverseJPA2JDL();
     private StringBuilder builder = new StringBuilder();
     @Before
     public void setup() {

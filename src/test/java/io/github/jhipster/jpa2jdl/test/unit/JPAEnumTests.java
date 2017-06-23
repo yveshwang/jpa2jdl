@@ -1,6 +1,6 @@
 package io.github.jhipster.jpa2jdl.test.unit;
 
-import io.github.jhipster.jpa2jdl.ReverseJPA2JDLMain;
+import io.github.jhipster.jpa2jdl.ReverseJPA2JDL;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class JPAEnumTests {
     }
 
     private <T extends Enum<T>> void parseEnum(Class<T> clazz) {
-        final ReverseJPA2JDLMain parser = new ReverseJPA2JDLMain();
+        final ReverseJPA2JDL parser = new ReverseJPA2JDL();
         final StringBuilder builder = new StringBuilder();
         parser.generateEnum2Jdl(builder, clazz);
         final String output = builder.toString();

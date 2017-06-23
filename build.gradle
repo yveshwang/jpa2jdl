@@ -38,7 +38,7 @@ task('prep') {
             println execute.args
         } else {
             println 'No args supplied.'
-            println 'Usage: gradle execute -Dargs=\'--packageName=blahblah\''
+            println 'Usage: gradle execute -Dargs=\'--packageName=io.github.jhipster.jpa2jdl.example.entities\''
             execute.enabled = false            
         }
     }	

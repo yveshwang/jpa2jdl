@@ -1,7 +1,7 @@
 package io.github.jhipster.jpa2jdl.test.unit;
 
-import io.github.jhipster.jpa2jdl.test.unit.entities.SimpleEntity;
-import io.github.jhipster.jpa2jdl.ReverseJPA2JDLMain;
+import io.github.jhipster.jpa2jdl.example.entities.SimpleEntity;
+import io.github.jhipster.jpa2jdl.ReverseJPA2JDL;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,7 +11,7 @@ import org.junit.Test;
 public class JPAEntitiesTests {
     @Test
     public void simpleEntityTest(){
-        final ReverseJPA2JDLMain parser = new ReverseJPA2JDLMain();
+        final ReverseJPA2JDL parser = new ReverseJPA2JDL();
         final StringBuilder entityBuilder = new StringBuilder();
         final StringBuilder relationsBuilder = new StringBuilder();
         parser.generateClass2Jdl(entityBuilder, relationsBuilder, SimpleEntity.class);
