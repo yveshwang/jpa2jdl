@@ -73,5 +73,8 @@ public class JPAEntitiesTests {
         Assert.assertTrue(entityOutput.contains("imageblob AnyBlob"));
         Assert.assertTrue(entityOutput.contains("textblob TextBlob"));
     }
-
+    @Test
+    public void patternTest() {
+        Assert.assertTrue(entityOutput.contains("email String required minlength(5) maxlength(30) pattern(\"[\\\\w]*@[a-zA-Z]*.com\")"));
+    }
 }

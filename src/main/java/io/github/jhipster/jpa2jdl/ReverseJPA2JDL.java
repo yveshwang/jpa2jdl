@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.lang.reflect.*;
 import java.util.Collection;
@@ -88,6 +89,7 @@ public class ReverseJPA2JDL {
             int min = -1;
             int max = -1;
             boolean isBlob = false;
+            String pattern = null;
             if( f.getDeclaredAnnotation(NotNull.class) != null) {
                 required = true;
             }
@@ -112,6 +114,12 @@ public class ReverseJPA2JDL {
             }
             if( f.getDeclaredAnnotation(Lob.class) != null) {
                 isBlob = true;
+            }
+            final Pattern pat = f.getDeclaredAnnotation(Pattern.class);
+            if( pat != null) {
+                if( pat.regexp() != null) {
+                    pattern = pat.regexp();
+                }
             }
             String relationType = null;
             Class<?> targetEntityClass = null;
@@ -189,7 +197,8 @@ public class ReverseJPA2JDL {
                 }
                 out.append("  " + fieldName + " " + getTypeName(isBlob, f) + (required ? " required" : "")
                         + ( (min > -1) ? " " + getMinLabel(isBlob,f) + "(" + min + ")" : "")
-                        + ( (max > -1) ? " " + getMaxLable(isBlob,f) + "(" + max + ")" : ""));
+                        + ( (max > -1) ? " " + getMaxLable(isBlob,f) + "(" + max + ")" : "")
+                        + ( (pattern != null) ? " pattern(\"" + pattern + "\")": ""));
             }
         }
         out.append("\n");

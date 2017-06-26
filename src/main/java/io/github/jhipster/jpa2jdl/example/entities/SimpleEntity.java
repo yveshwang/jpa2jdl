@@ -2,6 +2,7 @@ package io.github.jhipster.jpa2jdl.example.entities;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import java.sql.Blob;
@@ -121,6 +122,14 @@ public class SimpleEntity {
     @Lob
     @Column(name = "textblob")
     private String textblob;
+    // -------------
+
+    //pattern --
+    @NotNull
+    @Size(min = 5, max = 30)
+    @Pattern(regexp = "[\\\\w]*@[a-zA-Z]*.com")
+    @Column(name = "email", length = 30, nullable = false)
+    private String email;
     // -------------
 
     @NotNull
