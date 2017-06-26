@@ -25,8 +25,30 @@ Field annoated with `@Id` is skipped.
 ## field name vs `@Column(name = 'something')`
 The bean name wins over the column name. For example, a field called `dueDate` will be written as such in JDL. Note that when re-generating in jhipster, the column name could be set to `due_date`. This will then affect the db scripts and also the entity managers.
 
-## `@Lob` or TextBlob
-Images or any other binary information in `Blob (byte[])` is not supported for now. This includes `AnyBlob`, `Blog`, `ImageBlob` or `TextBlob`.
+## `@Lob` and Blobs
+Images or any other binary information in `Blob (byte[])` is supported partially. This includes `AnyBlob`, `Blog`, `ImageBlob` or `TextBlob`. The reason why it is partial is because 1 blob field in JDL is split into 2 JPA fields; the content field, and the content type descriptor field. 
+
+For example `blob Blob required minbytes(2)` translates to:
+```
+	public class SomeClass {
+		// ...
+		@NotNull
+	    	@Size(min = 2)
+	    	@Lob
+		@Column(name = "jhi_blob", nullable = false)
+		private byte[] blob;
+
+		@Column(name = "jhi_blob_content_type", nullable = false)
+		private String blobContentType;
+```
+Therefore in order to reverse generate the JDL, additional field/artifact **will** be created. This is not a side-affect free operation at all. To make the matter a little more interesting, `Blob` is a JDL supported type and is prefixed with `jhi_` when generated JPA from JDL. 
+
+To summarise, the jpa2jdl support for `Blob` are as follows:
+
+	* `Blob` are identified by `@Lob` annotations
+	* If the annotation is before a `String` type declaration, then `TextBlob` is generated, else everything else is a `AnyBlob`
+
+All in all, `Blob` suppport is not a very easily reversable operation and should be avoided where possible.
 
 ## joining is only done by the `id` field
-For now, customised joining is not support.
+For now, customised joining is not supported.

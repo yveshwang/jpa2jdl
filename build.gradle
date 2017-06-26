@@ -15,6 +15,27 @@ targetCompatibility = 1.8
 repositories {
      maven { url "http://repo.maven.apache.org/maven2" }
 }
+
+pmdMain {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+pmdTest {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+}
+
 dependencies {
     compile group: 'org.slf4j', name: 'slf4j-api', version:'1.7.16'
     compile group: 'args4j', name: 'args4j', version:'2.33'

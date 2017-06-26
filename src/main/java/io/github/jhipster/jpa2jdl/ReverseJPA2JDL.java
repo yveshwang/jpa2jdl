@@ -87,6 +87,7 @@ public class ReverseJPA2JDL {
             boolean required = false;
             int min = -1;
             int max = -1;
+            boolean isBlob = false;
             if( f.getDeclaredAnnotation(NotNull.class) != null) {
                 required = true;
             }
@@ -108,6 +109,9 @@ public class ReverseJPA2JDL {
                     //XXX: yves 23.06.2017, 255 is the default value for length
                     max = col.length();
                 }
+            }
+            if( f.getDeclaredAnnotation(Lob.class) != null) {
+                isBlob = true;
             }
             String relationType = null;
             Class<?> targetEntityClass = null;
@@ -183,16 +187,48 @@ public class ReverseJPA2JDL {
                 } else {
                     out.append(",\n");
                 }
-                out.append("  " + fieldName + " " + f.getType().getSimpleName() + (required ? " required" : "")
-                        + ( (min > -1) ? " minlength(" + min + ")" : "")
-                        + ( (max > -1) ? " maxlength(" + max + ")" : ""));
+                out.append("  " + fieldName + " " + getTypeName(isBlob, f) + (required ? " required" : "")
+                        + ( (min > -1) ? " " + getMinLabel(isBlob,f) + "(" + min + ")" : "")
+                        + ( (max > -1) ? " " + getMaxLable(isBlob,f) + "(" + max + ")" : ""));
             }
         }
         out.append("\n");
         out.append("}\n\n");
     }
-
-    private static Class<?> typeToClass(Type type) {
+    private String getMinLabel(final boolean isBlob, final Field f) {
+        if(isBlob) {
+            return "minbytes";
+        } else {
+            if( f.getType().equals(String.class)) {
+                return "minlength";
+            } else {
+                return "min";
+            }
+        }
+    }
+    private String getMaxLable(final boolean isBlob, final Field f) {
+        if(isBlob) {
+            return "maxbytes";
+        } else {
+            if( f.getType().equals(String.class)) {
+                return "maxlength";
+            } else {
+                return "max";
+            }
+        }
+    }
+    private String getTypeName(final boolean isBlob, final Field f) {
+        if( isBlob) {
+            if( f.getType().equals(String.class)) {
+                return "TextBlob";
+            } else {
+                return "AnyBlob";
+            }
+        } else {
+            return f.getType().getSimpleName() ;
+        }
+    }
+    private Class<?> typeToClass(Type type) {
         if (type instanceof Class) {
             return (Class<?>) type;
         } else if (type instanceof ParameterizedType) {

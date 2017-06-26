@@ -4,6 +4,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import java.sql.Blob;
+
 import static javax.persistence.AccessType.FIELD;
 import static javax.persistence.GenerationType.SEQUENCE;
 
@@ -54,6 +56,17 @@ public class SimpleEntity {
     @Size(max = 2)
     @Column(name = "max3", nullable = false)
     private String max3;
+
+    @NotNull
+    @Size(max = 4)
+    @Column(name = "max4", nullable = false)
+    private Integer max4;
+
+    @NotNull
+    @Size(max = 4)
+    @Column(name = "max5", nullable = false)
+    @Lob
+    private Blob max5;
     // -------------
 
     // min
@@ -73,10 +86,61 @@ public class SimpleEntity {
     @Size(min = 4)
     @Column(name = "min4", nullable = false)
     private String min4;
+
+    @NotNull
+    @Size(min = 4)
+    @Column(name = "min5", nullable = false)
+    private Integer min5;
+
+    @NotNull
+    @Size(min = 4)
+    @Column(name = "min6", nullable = false)
+    @Lob
+    private Blob min6;
+    // -------------
+
+    // field name
+    @Column(name = "fiedlname1")
+    private String fieldname1;
+
+    @Column(name = "fielname0_blahblah")
+    private String fieldname2;
+    // -------------
+
+    // blobs --
+    @NotNull
+    @Size(min = 2)
+    @Lob
+    @Column(name = "cotnentblob", nullable = false)
+    private byte[] contentblob;
+
+    @Lob
+    @Column(name = "imageblob")
+    private byte[] imageblob;
+
+    @Lob
+    @Column(name = "textblob")
+    private String textblob;
     // -------------
 
     @NotNull
     @Size(max = 10)
     @Column(name = "postcode", length = 10, nullable = false)
     private String postcode;
+
+    public int getBlah() {
+        return blah;
+    }
+
+    public void setBlah(int blah) {
+        this.blah = blah;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 }

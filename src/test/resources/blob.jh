@@ -1,0 +1,9 @@
+entity BFG {
+	blob Blob required minbytes(2),
+	anyBlob AnyBlob required maxbytes(3),
+	imageBlob ImageBlob,
+	textBlob TextBlob,
+        instant Instant
+}
+
+paginate BFG with infinite-scroll
