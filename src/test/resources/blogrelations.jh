@@ -1,0 +1,64 @@
+entity Blog {
+	name String required minlength(3),
+	handle String required minlength(2)
+}
+
+entity Entry {
+	title String required,
+	content TextBlob required,
+	date ZonedDateTime required
+}
+
+entity Tag {
+	name String required minlength(2)
+}
+
+entity Author {
+	name String required
+}
+
+entity AuthorAccess {
+	name String required
+	accessLevel Integer required
+}
+
+entity AuthorHome {
+	address String required
+}
+
+entity Alias {
+	nickname String required
+}
+
+entity Item {
+	name String required
+}
+entity Group {
+	name String required
+}
+relationship OneToOne {
+	Author{home} to AuthorHome{owner}
+}
+
+relationship OneToOne {
+	Author{access} to AuthorAccess
+}
+
+relationship OneToMany {
+	Author{alias} to Alias{identity}
+}
+
+relationship ManyToOne {
+	Item{group} to Group	
+}
+
+relationship ManyToOne {
+	Blog{user(login)} to User,
+	Entry{blog(name)} to Blog
+}
+
+relationship ManyToMany {
+	Entry{tag(name)} to Tag{entry}
+}
+
+paginate Entry, Tag with infinite-scroll

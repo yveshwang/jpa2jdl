@@ -116,10 +116,8 @@ public class ReverseJPA2JDL {
                 isBlob = true;
             }
             final Pattern pat = f.getDeclaredAnnotation(Pattern.class);
-            if( pat != null) {
-                if( pat.regexp() != null) {
-                    pattern = pat.regexp();
-                }
+            if( pat != null && pat.regexp() != null) {
+                pattern = pat.regexp();
             }
             String relationType = null;
             Class<?> targetEntityClass = null;
@@ -183,11 +181,11 @@ public class ReverseJPA2JDL {
                     LOG.info("ManyToMany .. mappedBy ??");
                 }
                 relationShips.append("  " + entityClassName + "{" + fieldName);
+                relationShips.append("} to " + targetEntityClassName);
                 if (mappedBy != null && !"".equals(mappedBy)) {
-                    relationShips.append("(" + mappedBy + ")");
+                    relationShips.append("{" + mappedBy + "}");
                 }
-                relationShips.append("} to " + targetEntityClassName + "\n");
-                relationShips.append("}\n\n");
+                relationShips.append("\n}\n\n");
             } else {
                 // simple field
                 if (firstField) {

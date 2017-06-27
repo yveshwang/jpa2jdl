@@ -52,3 +52,53 @@ All in all, `Blob` suppport is not a very easily reversable operation and should
 
 ## joining is only done by the `id` field
 For now, customised joining is not supported.
+
+## All the relationships
+For all the relationships, they are summarised below and in more details here https://jhipster.github.io/v2-documentation/jhipster-uml/. 
+### 1-1 bidirectional
+A car has one driver, a driver has one car.
+```
+relationship OneToOne {
+  Car{driver} to Driver{car}
+}
+```
+
+### 1-1 unidirectional
+A citizen has one passport, a passport has no access to citizen information.
+```
+relationship OneToOne {
+  Citizen{passport} to Passport
+}
+```
+
+### 1-many bidirectional
+A owner can have 0, 1 or more cars. A car has 1 known owner.
+```
+relationship OneToMany {
+  Owner{car} to Car{owner}
+}
+```
+
+### 1-many unidirectional (not supported)
+JHipster does not support this. And if it did, it would look like many-1 relationship below. 
+```
+relationship OneToMany {
+  Owner{car} to Car
+}
+```
+
+### many-1
+A little like the 1-many but reversed.
+```
+relationship OneToMany {
+  Owner{car} to Car
+}
+```
+
+### many-many
+A car could have several drivers and driver have access to several cars.
+```
+relationship ManyToMany {
+  Car{driver} to Driver{car}
+}
+```
