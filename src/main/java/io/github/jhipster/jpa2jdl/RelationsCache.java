@@ -26,8 +26,7 @@ public class RelationsCache {
                 if( oneToOne.containsKey(Integer.valueOf(r.hashCode()))) {
                     final RelationsCache.Relation existing = oneToOne.get(Integer.valueOf(r.hashCode()));
                     if( !existing.bidirectional) {
-                        if( (!r.bidirectional &&
-                                (existing.left.hashCode() == r.right.hashCode())) ||
+                        if( (existing.left.className.hashCode() == r.right.className.hashCode()) ||
                                 (r.bidirectional)) {
                             r.bidirectional = true;
                             oneToOne.put(Integer.valueOf(r.hashCode()), r);
@@ -42,11 +41,28 @@ public class RelationsCache {
             case ManyToOne:
                 break;
             case ManyToMany:
+                // scenario many_to_many: unidirection because it makes no sense.
+                // JPA uses mappedBy attribute to specify the inverse of the relationship.
+                // i.e the entity that "owns" the relation will not have the mappedBy attribute set.
+                // e.g. @ManyToMany(mappedBy = "tags")
+                // where as the owner of the relationship will have the @JoinTable annotation.
+                // safe to assume that there will be two ManyToMany relations when parsing JPA entities, 1 that is "unidirectional" and 1 that is "bidirectional".
+                // so we look for the bidirectional one and ignore the uni :)
+                if( manyToMany.containsKey(Integer.valueOf(r.hashCode()))) {
+                    final RelationsCache.Relation existing = manyToMany.get(Integer.valueOf(r.hashCode()));
+                    if( !existing.bidirectional && r.bidirectional) {
+                        //so this is the inverse of the relationship, if the new relation is the owner, then just update it
+                        //else ignore?
+                        manyToMany.put(Integer.valueOf(r.hashCode()), r);
+                    }
+                } else {
+                    manyToMany.put(Integer.valueOf(r.hashCode()), r);
+                }
                 break;
             default:
 
         }
-        //scenario many_to_many 2: ignore unidirection because it makes no sense, and assume all are bidirectional.
+
         //scenario many_to_one 3: many_to_one could be bidrectional as that would be the same as one_to_many
 
     }
@@ -89,11 +105,11 @@ public class RelationsCache {
     }
     private static int hash_manytomany(final Relation r) {
         //scenario: many2many is always bidirectional, same as onetoone
-        return RelationType.ManyToMany.hashCode() + r.left.hashCode() + r.right.hashCode();
+        return RelationType.ManyToMany.hashCode() + r.left.className.hashCode() + r.right.className.hashCode();
     }
     private static int hash_onetoone(final Relation r) {
         //scenario: unidirectional relations can be upgraded to bidirectional relations, therefore the same hash should be returned
-        return RelationType.OneToOne.hashCode() + r.left.hashCode() + r.right.hashCode();
+        return RelationType.OneToOne.hashCode() + r.left.className.hashCode() + r.right.className.hashCode();
     }
     public static class Relation {
         EntityDesc left;
@@ -118,6 +134,10 @@ public class RelationsCache {
         @Override
         public int hashCode() {
             return hash(this);
+        }
+
+        public boolean isBidirectional() {
+            return bidirectional;
         }
     }
 

@@ -53,8 +53,14 @@ All in all, `Blob` suppport is not a very easily reversable operation and should
 ## joining is only done by the `id` field
 For now, customised joining is not supported.
 
-## All the relationships
+##  Relationships
 For all the relationships, they are summarised below and in more details here https://jhipster.github.io/v2-documentation/jhipster-uml/. 
+
+Assumptions are:
+
+* for `ManyToMany`, ensure one entity owns the relationship by specifying `@JoinTable` annotation on the JPA entity, and the ownee (inverse of ownership) is outlined by using the `mappedBy = ` attribute.
+* for `OneToOne` the relationship is fairly straight forward. If it is a bidirectional relationship, the ownee can be identified through the `mappedBy` attribute.
+
 ### 1-1 bidirectional
 A car has one driver, a driver has one car.
 ```
