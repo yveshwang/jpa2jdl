@@ -83,7 +83,7 @@ public class ReverseJPA2JDL {
             }
             relationShips.append("\n");
         }
-        relationShips.append("\n}\n\n");
+        relationShips.append("}\n\n");
     }
     public void generateClass2Jdl(StringBuilder out,  Class<?> e) {
         final String entityClassName = e.getSimpleName();

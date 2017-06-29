@@ -53,46 +53,7 @@ public class RelationsCache {
                             oneToOne.put(Integer.valueOf(r.hashCode()), r);
                         }
                     }
-                    /*if(r.bidirectional) {
-                        // remove uni
-                        final List<Relation> list = oneToOne.values().stream()
-                                .filter(relation -> !relation.bidirectional)
-                                .filter(relation -> ( (r.left.hashCode() == relation.left.hashCode() && r.right.className.equals(relation.right.className))
-                                            || (r.right.hashCode() == relation.left.hashCode() && r.left.className.equals(relation.right.className) )))
-                                .collect(Collectors.toList());
-                        list.forEach(relation -> {
-                            oneToOne.remove(Integer.valueOf(relation.hashCode()));
-                        });
-                        // add it the bi
-                        oneToOne.put(Integer.valueOf(r.hashCode()), r);
-                    } else {
-                        //chceck for bi
-                        final Relation birel = oneToOne.values().stream()
-                                .filter( relation -> relation.bidirectional)
-                                .filter( relation -> (r.left.hashCode() == relation.left.hashCode() && r.right.className.equals(relation.right.className))
-                                        || (r.left.hashCode() == relation.right.hashCode() && r.right.className.equals(relation.left.className) ))
-                                .findAny()
-                                .orElse(null);
-                        final Relation inverse = oneToOne.values().stream()
-                                .filter( relation -> !relation.bidirectional)
-                                .filter( relation -> ())
-                    }
-                    */
                 }
-                /*if( oneToOne.containsKey(Integer.valueOf(r.hashCode()))) {
-                    final RelationsCache.Relation existing = oneToOne.get(Integer.valueOf(r.hashCode()));
-                    if( !existing.bidirectional) {
-                        if( (existing.left.className.hashCode() == r.right.className.hashCode()) ||
-                                (r.bidirectional)) {
-                            r.bidirectional = true;
-                            oneToOne.put(Integer.valueOf(r.hashCode()), r);
-                        }
-                    }
-                } else {
-                    // does not contain the key, let's add it
-                    oneToOne.put(Integer.valueOf(r.hashCode()), r);
-                }*/
-
                 break;
             case OneToMany:
                 // scenario one_to_many: since jhipster does not support unidirectional version of one_to_many,
@@ -102,6 +63,13 @@ public class RelationsCache {
                 } else {
                     if( !oneToMany.containsKey(Integer.valueOf(r.hashCode()))) {
                         oneToMany.put(Integer.valueOf(r.hashCode()), r);
+                        final Relation exists = manyToOne.values().stream()
+                                .filter(relation -> !relation.bidirectional)
+                                .filter(relation -> (relation.left.hashCode() == r.right.hashCode() && relation.right.className.hashCode() == r.left.className.hashCode()))
+                                .findAny().orElse(null);
+                        if( exists != null) {
+                            manyToOne.remove(exists.hashCode());
+                        }
                     }
                 }
                 break;
@@ -136,23 +104,6 @@ public class RelationsCache {
             default:
 
         }
-    }
-    private Relation getBidirectionalEquivalentOneToOne(final Relation uni) {
-        // return if there is an existing similar bidirecitonal relation,
-        // or
-        // return if there is an inverse unidirectional relation
-        final Iterator<Relation> it = oneToOne.values().iterator();
-        while( it.hasNext()) {
-            final Relation r = it.next();
-            if( r.bidirectional) {
-                if( r.left.hashCode() == uni.left.hashCode() || r.right.hashCode() == uni.left.hashCode()) {
-                    return r;
-                }
-            } else {
-
-            }
-        }
-        return null;
     }
     private boolean hasBidirectionalOneToMany(final Relation uni) {
         final Iterator<Relation> it = oneToMany.values().iterator();
