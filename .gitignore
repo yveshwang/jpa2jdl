@@ -9,3 +9,4 @@ build/
 .gradle/
 *.iml
 .idea/
+.DS_Store

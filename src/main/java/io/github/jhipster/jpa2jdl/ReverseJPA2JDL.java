@@ -4,22 +4,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public class ReverseJPA2JDL {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseJPA2JDL.class);
+    private RelationsCache relations = new RelationsCache();
     public String generate(Set<Class<?>> entitySubClasses, Set<Class<?>> enums ) {
         final StringBuilder jdl = new StringBuilder();
         for(Class<?> e : enums) {
             generateEnum2Jdl(jdl, e);
         }
-        StringBuilder relationShips = new StringBuilder();
         for(Class<?> e : entitySubClasses) {
-            generateClass2Jdl(jdl, relationShips, e);
+            generateClass2Jdl(jdl, e);
         }
-        jdl.append(relationShips);
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.OneToOne.name(), new ArrayList<>(relations.getOneToOne().values()));
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.OneToMany.name(), new ArrayList<>(relations.getOneToMany().values()));
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.ManyToOne.name(), new ArrayList<>(relations.getManyToOne().values()));
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.ManyToMany.name(), new ArrayList<>(relations.getManyToMany().values()));
         for(Class<?> e : entitySubClasses) {
             generatePagination(jdl, e);
         }
@@ -64,8 +72,20 @@ public class ReverseJPA2JDL {
         out.append("\n");
         out.append("}\n\n");
     }
-
-    public void generateClass2Jdl(StringBuilder out, StringBuilder relationShips,  Class<?> e) {
+    public void generateRelations2Jdl(final StringBuilder relationShips, final String relationType, final List<RelationsCache.Relation> relations) {
+        relationShips.append("relationship " + relationType + " {\n");
+        for(int i = 0; i < relations.size(); i++) {
+            final RelationsCache.Relation rel = relations.get(i);
+            relationShips.append("\t");
+            relationShips.append(rel.toStringUntabbed());
+            if( i < relations.size() -1) {
+                relationShips.append(",");
+            }
+            relationShips.append("\n");
+        }
+        relationShips.append("\n}\n\n");
+    }
+    public void generateClass2Jdl(StringBuilder out,  Class<?> e) {
         final String entityClassName = e.getSimpleName();
         boolean firstField = true;
         out.append("entity " + entityClassName + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
@@ -76,12 +96,46 @@ public class ReverseJPA2JDL {
             if (f.isSynthetic() || Modifier.isStatic(f.getModifiers())) {
                 continue;
             }
-            // Annotation[] fieldAnnotations = f.getDeclaredAnnotations();
-
             if (f.getDeclaredAnnotation(Transient.class) != null) {
                 continue;
             }
-
+            if (f.getDeclaredAnnotation(Id.class) != null) {
+                continue;
+            }
+            boolean required = false;
+            int min = -1;
+            int max = -1;
+            boolean isBlob = false;
+            String pattern = null;
+            if( f.getDeclaredAnnotation(NotNull.class) != null) {
+                required = true;
+            }
+            final Size size = f.getDeclaredAnnotation(Size.class);
+            if (size != null) {
+                if( size.max() < Integer.MAX_VALUE) {
+                    max = size.max();
+                }
+                if (size.min() > 0) {
+                    min = size.min();
+                }
+            }
+            final Column col = f.getDeclaredAnnotation(Column.class);
+            if( col != null) {
+                if(!col.nullable()) {
+                    required = true;
+                }
+                if( col.length() > 0 && f.getType().getSimpleName().equals("String") && col.length() != 255) {
+                    //XXX: yves 23.06.2017, 255 is the default value for length
+                    max = col.length();
+                }
+            }
+            if( f.getDeclaredAnnotation(Lob.class) != null) {
+                isBlob = true;
+            }
+            final Pattern pat = f.getDeclaredAnnotation(Pattern.class);
+            if( pat != null && pat.regexp() != null) {
+                pattern = pat.regexp();
+            }
             String relationType = null;
             Class<?> targetEntityClass = null;
             boolean fromMany = false;
@@ -121,7 +175,6 @@ public class ReverseJPA2JDL {
 
             if (relationType != null) {
                 // relationship
-                relationShips.append("relationship " + relationType + " {\n");
                 if (targetEntityClass == void.class || targetEntityClass == null) {
                     targetEntityClass = typeToClass(fieldType);
                 }
@@ -143,12 +196,16 @@ public class ReverseJPA2JDL {
                 if (fromMany && toMany) {
                     LOG.info("ManyToMany .. mappedBy ??");
                 }
+                relations.addRelation(entityClassName, fieldName, targetEntityClassName, (mappedBy != null && !"".equals(mappedBy)) ? mappedBy : null, relationType);
+                /*
+                relationShips.append("relationship " + relationType + " {\n");
                 relationShips.append("  " + entityClassName + "{" + fieldName);
+                relationShips.append("} to " + targetEntityClassName);
                 if (mappedBy != null && !"".equals(mappedBy)) {
-                    relationShips.append("(" + mappedBy + ")");
+                    relationShips.append("{" + mappedBy + "}");
                 }
-                relationShips.append("} to " + targetEntityClassName + "\n");
-                relationShips.append("}\n\n");
+                relationShips.append("\n}\n\n");
+                */
             } else {
                 // simple field
                 if (firstField) {
@@ -156,14 +213,49 @@ public class ReverseJPA2JDL {
                 } else {
                     out.append(",\n");
                 }
-                out.append("  " + fieldName + " " + f.getType().getSimpleName());
+                out.append("  " + fieldName + " " + getTypeName(isBlob, f) + (required ? " required" : "")
+                        + ( (min > -1) ? " " + getMinLabel(isBlob,f) + "(" + min + ")" : "")
+                        + ( (max > -1) ? " " + getMaxLable(isBlob,f) + "(" + max + ")" : "")
+                        + ( (pattern != null) ? " pattern(\"" + pattern + "\")": ""));
             }
         }
         out.append("\n");
         out.append("}\n\n");
     }
-
-    private static Class<?> typeToClass(Type type) {
+    private String getMinLabel(final boolean isBlob, final Field f) {
+        if(isBlob) {
+            return "minbytes";
+        } else {
+            if( f.getType().equals(String.class)) {
+                return "minlength";
+            } else {
+                return "min";
+            }
+        }
+    }
+    private String getMaxLable(final boolean isBlob, final Field f) {
+        if(isBlob) {
+            return "maxbytes";
+        } else {
+            if( f.getType().equals(String.class)) {
+                return "maxlength";
+            } else {
+                return "max";
+            }
+        }
+    }
+    private String getTypeName(final boolean isBlob, final Field f) {
+        if( isBlob) {
+            if( f.getType().equals(String.class)) {
+                return "TextBlob";
+            } else {
+                return "AnyBlob";
+            }
+        } else {
+            return f.getType().getSimpleName() ;
+        }
+    }
+    private Class<?> typeToClass(Type type) {
         if (type instanceof Class) {
             return (Class<?>) type;
         } else if (type instanceof ParameterizedType) {

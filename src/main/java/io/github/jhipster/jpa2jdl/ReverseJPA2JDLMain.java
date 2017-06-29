@@ -37,11 +37,10 @@ public class ReverseJPA2JDLMain {
         }
         app.run();
     }
-
-    public void run() {
+    public static Set<Class<?>> packageNameToClasses(final String name) {
         final Configuration config = Configuration.config()
                 .with(new SubTypeScanner(), new TypeAnnotationScanner())
-                .scan(packageName);
+                .scan(name);
         final Scannit scannit = new Scannit(config);
         final Set<Class<?>> entityClasses = scannit.getTypesAnnotatedWith(Entity.class);
         final Set<Class<?>> entitySubClasses = new HashSet<>();
@@ -57,7 +56,9 @@ public class ReverseJPA2JDLMain {
         if (entitySubClasses.size() > entityClasses.size()) {
             LOG.info("Found sub-classes of @Entity classes:" + entitySubClasses.size() + " : " + entitySubClasses);
         }
-
+        return entitySubClasses;
+    }
+    public static Set<Class<?>> filterOutEnums(Set<Class<?>> entitySubClasses) {
         // scan enum types in entities field type
         final Set<Class<?>> enums = new LinkedHashSet<>();
         for (Class<?> e : entitySubClasses) {
@@ -72,6 +73,11 @@ public class ReverseJPA2JDLMain {
                 }
             }
         }
+        return enums;
+    }
+    public void run() {
+        final Set<Class<?>> entitySubClasses = packageNameToClasses(packageName);
+        final Set<Class<?>> enums = filterOutEnums(entitySubClasses);
         System.out.println(jpa2jdl.generate(entitySubClasses, enums));
     }
 }
