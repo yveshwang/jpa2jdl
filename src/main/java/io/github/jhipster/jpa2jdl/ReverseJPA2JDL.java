@@ -16,6 +16,14 @@ import java.util.Set;
 public class ReverseJPA2JDL {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseJPA2JDL.class);
     private RelationsCache relations = new RelationsCache();
+    public String debuginfo() {
+        final StringBuilder builder = new StringBuilder();
+        final List<RelationsCache.Relation> list = relations.getDebug();
+        for(final RelationsCache.Relation relation: list) {
+            builder.append(relation.toString() + "\n");
+        }
+        return builder.toString();
+    }
     public String generate(Set<Class<?>> entitySubClasses, Set<Class<?>> enums ) {
         final StringBuilder jdl = new StringBuilder();
         for(Class<?> e : enums) {

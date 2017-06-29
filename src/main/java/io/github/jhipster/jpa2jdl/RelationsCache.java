@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * Created by yveshwang on 26/06/2017.
@@ -15,13 +16,14 @@ public class RelationsCache {
     private final HashMap<Integer, RelationsCache.Relation> oneToMany = new HashMap<>();
     private final HashMap<Integer, RelationsCache.Relation> manyToOne = new HashMap<>();
     private final HashMap<Integer, RelationsCache.Relation> manyToMany = new HashMap<>();
-
+    private final LinkedList<Relation>  debug = new LinkedList<>();
     public RelationsCache() {
         // empty
     }
 
     public void addRelation(String leftClass, String leftField, String rightClass, String rightField, String type) {
         final RelationsCache.Relation r = new Relation(new EntityDesc(leftClass, leftField), new EntityDesc(rightClass, rightField), RelationsCache.RelationType.valueOf(type));
+        debug.add(r);
         switch(r.type) {
             case OneToOne:
                 // 1-1
@@ -50,6 +52,13 @@ public class RelationsCache {
                                         || (relation.left.hashCode() == r.left.hashCode() && relation.right.className.hashCode() == r.right.className.hashCode()))
                                 .findAny().orElse(null);
                         if( exists == null) {
+                            oneToOne.put(Integer.valueOf(r.hashCode()), r);
+                        } else if( r.left.hashCode() == exists.right.hashCode() && r.right.className.hashCode() == exists.left.className.hashCode()){
+                            // remove the swapped bidrectional stuff
+                            // https://github.com/yveshwang/jpa2jdl/issues/5
+                            oneToOne.remove(Integer.valueOf(exists.hashCode()));
+                            r.bidirectional = true;
+                            r.right.fieldName = exists.left.fieldName;
                             oneToOne.put(Integer.valueOf(r.hashCode()), r);
                         }
                     }
@@ -131,6 +140,9 @@ public class RelationsCache {
 
     public HashMap<Integer, Relation> getManyToMany() {
         return manyToMany;
+    }
+    public LinkedList<Relation> getDebug() {
+        return debug;
     }
 
     public enum RelationType {
@@ -231,7 +243,7 @@ public class RelationsCache {
 
         @Override
         public String toString() {
-            return className + (fieldName != null ? " {" + fieldName + "}" : "");
+            return className + (fieldName != null ? "{" + fieldName + "}" : "");
         }
     }
 }
