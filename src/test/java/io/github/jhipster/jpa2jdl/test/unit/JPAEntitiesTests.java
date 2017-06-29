@@ -11,17 +11,13 @@ import org.junit.Test;
  */
 public class JPAEntitiesTests {
     private static String entityOutput;
-    private static String relationsOutput;
     @BeforeClass
     public static void parse() {
         final ReverseJPA2JDL parser = new ReverseJPA2JDL();
         final StringBuilder entityBuilder = new StringBuilder();
-        final StringBuilder relationsBuilder = new StringBuilder();
-        parser.generateClass2Jdl(entityBuilder, relationsBuilder, SimpleEntity.class);
+        parser.generateClass2Jdl(entityBuilder, SimpleEntity.class);
         entityOutput = entityBuilder.toString();
-        relationsOutput = relationsBuilder.toString();
         System.out.println(entityOutput);
-        System.out.println(relationsOutput);
     }
     @Test
     public void simpleEntityTest(){

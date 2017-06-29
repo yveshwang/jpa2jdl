@@ -8,21 +8,26 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public class ReverseJPA2JDL {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseJPA2JDL.class);
+    private RelationsCache relations = new RelationsCache();
     public String generate(Set<Class<?>> entitySubClasses, Set<Class<?>> enums ) {
         final StringBuilder jdl = new StringBuilder();
         for(Class<?> e : enums) {
             generateEnum2Jdl(jdl, e);
         }
-        StringBuilder relationShips = new StringBuilder();
         for(Class<?> e : entitySubClasses) {
-            generateClass2Jdl(jdl, relationShips, e);
+            generateClass2Jdl(jdl, e);
         }
-        jdl.append(relationShips);
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.OneToOne.name(), new ArrayList<>(relations.getOneToOne().values()));
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.OneToMany.name(), new ArrayList<>(relations.getOneToMany().values()));
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.ManyToOne.name(), new ArrayList<>(relations.getManyToOne().values()));
+        generateRelations2Jdl(jdl, RelationsCache.RelationType.ManyToMany.name(), new ArrayList<>(relations.getManyToMany().values()));
         for(Class<?> e : entitySubClasses) {
             generatePagination(jdl, e);
         }
@@ -67,8 +72,20 @@ public class ReverseJPA2JDL {
         out.append("\n");
         out.append("}\n\n");
     }
-
-    public void generateClass2Jdl(StringBuilder out, StringBuilder relationShips,  Class<?> e) {
+    public void generateRelations2Jdl(final StringBuilder relationShips, final String relationType, final List<RelationsCache.Relation> relations) {
+        relationShips.append("relationship " + relationType + " {\n");
+        for(int i = 0; i < relations.size(); i++) {
+            final RelationsCache.Relation rel = relations.get(i);
+            relationShips.append("\t");
+            relationShips.append(rel.toStringUntabbed());
+            if( i < relations.size() -1) {
+                relationShips.append(",");
+            }
+            relationShips.append("\n");
+        }
+        relationShips.append("\n}\n\n");
+    }
+    public void generateClass2Jdl(StringBuilder out,  Class<?> e) {
         final String entityClassName = e.getSimpleName();
         boolean firstField = true;
         out.append("entity " + entityClassName + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
@@ -158,7 +175,6 @@ public class ReverseJPA2JDL {
 
             if (relationType != null) {
                 // relationship
-                relationShips.append("relationship " + relationType + " {\n");
                 if (targetEntityClass == void.class || targetEntityClass == null) {
                     targetEntityClass = typeToClass(fieldType);
                 }
@@ -180,12 +196,16 @@ public class ReverseJPA2JDL {
                 if (fromMany && toMany) {
                     LOG.info("ManyToMany .. mappedBy ??");
                 }
+                relations.addRelation(entityClassName, fieldName, targetEntityClassName, (mappedBy != null && !"".equals(mappedBy)) ? mappedBy : null, relationType);
+                /*
+                relationShips.append("relationship " + relationType + " {\n");
                 relationShips.append("  " + entityClassName + "{" + fieldName);
                 relationShips.append("} to " + targetEntityClassName);
                 if (mappedBy != null && !"".equals(mappedBy)) {
                     relationShips.append("{" + mappedBy + "}");
                 }
                 relationShips.append("\n}\n\n");
+                */
             } else {
                 // simple field
                 if (firstField) {

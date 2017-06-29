@@ -250,6 +250,9 @@ public class RelationsCache {
                     + "\t\t" + left.toString() + " to " + right.toString() + "\n"
                     + "\t}";
         }
+        public String toStringUntabbed() {
+            return left.toString() + " to " + right.toString();
+        }
     }
 
     public static class EntityDesc {
