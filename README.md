@@ -58,8 +58,10 @@ For all the relationships, they are summarised below and in more details here ht
 
 Assumptions are:
 
-* for `ManyToMany`, ensure one entity owns the relationship by specifying `@JoinTable` annotation on the JPA entity, and the ownee (inverse of ownership) is outlined by using the `mappedBy = ` attribute.
-* for `OneToOne` the relationship is fairly straight forward. If it is a bidirectional relationship, the ownee can be identified through the `mappedBy` attribute.
+* `ManyToMany`: ensure one entity owns the relationship by specifying `@JoinTable` annotation on the JPA entity, and the ownee (inverse of ownership) is outlined by using the `mappedBy = ` attribute. The relationship is always bidirectional, thus if unidirectional is detected, it will generate a warning and relationship is therefore ignored.
+* `OneToOne`: the relationship is fairly straight forward. If it is a bidirectional relationship, the ownee can be identified through the `mappedBy` attribute.
+* `OneToMany` is always bidirectional as outlined by jhipster. If we detect any unidirectional relationships, a warning is displayed and the relationship is ignored.
+* `ManyToOne` is always unidirectional as outlined by jhipster. If we detect any bidirectional relationships, a warning is displayed and the relationship is ignored.
 
 ### 1-1 bidirectional
 A car has one driver, a driver has one car.

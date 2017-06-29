@@ -49,6 +49,7 @@ public class JPARelationsHashingTests {
     }
     @Test
     public void one2many_test() {
+        // note that in jhipster one-to-many is designed to be a bidirectional relation, while many-to-one is designed to be a unidirectional relation
         final RelationsCache.Relation relation1 = new RelationsCache.Relation(left, uniright, RelationsCache.RelationType.OneToMany);
         final RelationsCache.Relation relation2 = new RelationsCache.Relation(uniright, left, RelationsCache.RelationType.OneToMany);
         final RelationsCache.Relation relation3 = new RelationsCache.Relation(left, uniright, RelationsCache.RelationType.ManyToOne);
@@ -56,11 +57,11 @@ public class JPARelationsHashingTests {
         final RelationsCache.Relation relation5 = new RelationsCache.Relation(left, uniright, RelationsCache.RelationType.ManyToMany);
         final RelationsCache.Relation relation6 = new RelationsCache.Relation(right, left, RelationsCache.RelationType.OneToOne);
         Assert.assertEquals(relation1, relation2);
-        Assert.assertEquals(relation1, relation3);
-        Assert.assertEquals(relation1, relation4);
-        Assert.assertEquals(relation2, relation3);
-        Assert.assertEquals(relation2, relation4);
-        Assert.assertEquals(relation3, relation4);
+        Assert.assertNotEquals(relation1, relation3);
+        Assert.assertNotEquals(relation1, relation4);
+        Assert.assertNotEquals(relation2, relation3);
+        Assert.assertNotEquals(relation2, relation4);
+        Assert.assertNotEquals(relation3, relation4);
         Assert.assertNotEquals(relation1, relation5);
         Assert.assertNotEquals(relation1, relation6);
         Assert.assertNotEquals(relation5, relation6);
