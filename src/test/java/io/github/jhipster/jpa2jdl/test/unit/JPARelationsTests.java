@@ -25,6 +25,7 @@ public class JPARelationsTests {
         final ReverseJPA2JDL jpa2jdp = new ReverseJPA2JDL();
         OUTPUT = jpa2jdp.generate(CLASSES, ENUMS);
         System.out.println(OUTPUT);
+        System.out.println(jpa2jdp.debuginfo());
     }
 
     @Test
