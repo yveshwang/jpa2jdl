@@ -11,6 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.Entity;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
@@ -24,6 +28,8 @@ public class ReverseJPA2JDLMain {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseJPA2JDLMain.class);
     @Option(name="--packageName")
     private String packageName;
+    @Option(name="--out")
+    private String outputpath;
     private ReverseJPA2JDL jpa2jdl = new ReverseJPA2JDL();
     public static void main(String[] args) {
         final ReverseJPA2JDLMain app = new ReverseJPA2JDLMain();
@@ -78,6 +84,25 @@ public class ReverseJPA2JDLMain {
     public void run() {
         final Set<Class<?>> entitySubClasses = packageNameToClasses(packageName);
         final Set<Class<?>> enums = filterOutEnums(entitySubClasses);
-        System.out.println(jpa2jdl.generate(entitySubClasses, enums));
+        final String text = jpa2jdl.generate(entitySubClasses, enums);
+        if( outputpath == null) {
+            System.out.println(text);
+        } else {
+            try {
+                write(text, outputpath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void write(final String text, final String fullPath) throws IOException {
+         try( final OutputStreamWriter output = new OutputStreamWriter(
+                 new FileOutputStream(fullPath), "UTF-8");
+              final BufferedWriter buffered =
+                      new BufferedWriter(output)) {
+             buffered.write(text);
+         }
     }
 }
