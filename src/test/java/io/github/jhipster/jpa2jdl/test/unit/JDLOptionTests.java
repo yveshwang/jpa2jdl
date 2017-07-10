@@ -1,7 +1,7 @@
 package io.github.jhipster.jpa2jdl.test.unit;
 
-import io.github.jhipster.jpa2jdl.example.entities.SimpleEntity;
 import io.github.jhipster.jpa2jdl.ReverseJPA2JDL;
+import io.github.jhipster.jpa2jdl.example.entities.SimpleEntity;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -15,7 +15,7 @@ public class JPAEntitiesTests {
     public static void parse() {
         final ReverseJPA2JDL parser = new ReverseJPA2JDL();
         final StringBuilder entityBuilder = new StringBuilder();
-        parser.generateClass2Jdl(entityBuilder, SimpleEntity.class);
+        parser.generateClass2Jdl(SimpleEntity.class, entityBuilder);
         entityOutput = entityBuilder.toString();
         System.out.println(entityOutput);
     }

@@ -3,18 +3,22 @@ package io.github.jhipster.jpa2jdl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import java.lang.reflect.*;
+import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+
+import static java.util.Objects.isNull;
 
 public class ReverseJPA2JDL {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseJPA2JDL.class);
+    public static final String EMPTY_PREFIX = "";
     private RelationsCache relations = new RelationsCache();
     public String debuginfo() {
         final StringBuilder builder = new StringBuilder();
@@ -30,7 +34,7 @@ public class ReverseJPA2JDL {
             generateEnum2Jdl(jdl, e);
         }
         for(Class<?> e : entitySubClasses) {
-            generateClass2Jdl(jdl, e);
+            generateClass2Jdl(e, jdl);
         }
         generateRelations2Jdl(jdl, RelationsCache.RelationType.OneToOne.name(), new ArrayList<>(relations.getOneToOne().values()));
         generateRelations2Jdl(jdl, RelationsCache.RelationType.OneToMany.name(), new ArrayList<>(relations.getOneToMany().values()));
@@ -93,191 +97,76 @@ public class ReverseJPA2JDL {
         }
         relationShips.append("}\n\n");
     }
-    public void generateClass2Jdl(StringBuilder out,  Class<?> e) {
-        final String entityClassName = e.getSimpleName();
-        boolean firstField = true;
-        out.append("entity " + entityClassName + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
+
+    public void generateClass2Jdl(final Class<?> e, final StringBuilder out) {
+        boolean isFirstField = true;
+        if (isFirstField) {
+            out.append("entity " + e.getSimpleName() + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
+        }
+
         final Field[] declaredFields = e.getDeclaredFields();
         for(final Field f : declaredFields) {
-            String fieldName = f.getName();
-            Type fieldType = f.getType();
-            if (f.isSynthetic() || Modifier.isStatic(f.getModifiers())) {
-                continue;
-            }
-            if (f.getDeclaredAnnotation(Transient.class) != null) {
-                continue;
-            }
-            if (f.getDeclaredAnnotation(Id.class) != null) {
-                continue;
-            }
-            boolean required = false;
-            int min = -1;
-            int max = -1;
-            boolean isBlob = false;
-            String pattern = null;
-            if( f.getDeclaredAnnotation(NotNull.class) != null) {
-                required = true;
-            }
-            final Size size = f.getDeclaredAnnotation(Size.class);
-            if (size != null) {
-                if( size.max() < Integer.MAX_VALUE) {
-                    max = size.max();
-                }
-                if (size.min() > 0) {
-                    min = size.min();
-                }
-            }
-            final Column col = f.getDeclaredAnnotation(Column.class);
-            if( col != null) {
-                if(!col.nullable()) {
-                    required = true;
-                }
-                if( col.length() > 0 && f.getType().getSimpleName().equals("String") && col.length() != 255) {
-                    //XXX: yves 23.06.2017, 255 is the default value for length
-                    max = col.length();
-                }
-            }
-            if( f.getDeclaredAnnotation(Lob.class) != null) {
-                isBlob = true;
-            }
-            final Pattern pat = f.getDeclaredAnnotation(Pattern.class);
-            if( pat != null && pat.regexp() != null) {
-                pattern = pat.regexp();
-            }
-            String relationType = null;
-            Class<?> targetEntityClass = null;
-            boolean fromMany = false;
-            boolean toMany = false;
-            String mappedBy = "";
-            final OneToMany oneToManyAnnotation = f.getDeclaredAnnotation(OneToMany.class);
-            if (oneToManyAnnotation != null) {
-                relationType = "OneToMany";
-                targetEntityClass = oneToManyAnnotation.targetEntity();
-                fromMany = false;
-                toMany = true;
-                mappedBy = oneToManyAnnotation.mappedBy();
-            }
-            final OneToOne oneToOneAnnotation = f.getDeclaredAnnotation(OneToOne.class);
-            if (oneToOneAnnotation != null) {
-                relationType = "OneToOne";
-                targetEntityClass = oneToOneAnnotation.targetEntity();
-                fromMany = false;
-                toMany = false;
-                mappedBy = oneToOneAnnotation.mappedBy();
-            }
-            final ManyToMany manyToManyAnnotation = f.getDeclaredAnnotation(ManyToMany.class);
-            if (manyToManyAnnotation != null) {
-                relationType = "ManyToMany";
-                targetEntityClass = manyToManyAnnotation.targetEntity();
-                fromMany = true;
-                toMany = true;
-                mappedBy = manyToManyAnnotation.mappedBy();
-            }
-            final ManyToOne manyToOneAnnotation = f.getDeclaredAnnotation(ManyToOne.class);
-            if (manyToOneAnnotation != null) {
-                relationType = "ManyToOne";
-                targetEntityClass = manyToOneAnnotation.targetEntity();
-                fromMany = true;
-                toMany = false;
-            }
-
-            if (relationType != null) {
-                // relationship
-                if (targetEntityClass == void.class || targetEntityClass == null) {
-                    targetEntityClass = typeToClass(fieldType);
-                }
-
-                if (toMany && targetEntityClass != null && Collection.class.isAssignableFrom(targetEntityClass)) {
-                    final Class<?> compType = targetEntityClass.getComponentType();
-                    if (compType != null) {
-                        targetEntityClass = compType;
-                    } else {
-                        final Type fieldGenericType = f.getGenericType();
-                        if (fieldGenericType instanceof ParameterizedType) {
-                            final ParameterizedType pt = (ParameterizedType) fieldGenericType;
-                            targetEntityClass = typeToClass(pt.getActualTypeArguments()[0]);
-                        }
-                    }
-                }
-
-                final String targetEntityClassName = targetEntityClass != null? targetEntityClass.getSimpleName() : "";
-                if (fromMany && toMany) {
-                    LOG.info("ManyToMany .. mappedBy ??");
-                }
-                relations.addRelation(entityClassName, fieldName, targetEntityClassName, (mappedBy != null && !"".equals(mappedBy)) ? mappedBy : null, relationType);
-                /*
-                relationShips.append("relationship " + relationType + " {\n");
-                relationShips.append("  " + entityClassName + "{" + fieldName);
-                relationShips.append("} to " + targetEntityClassName);
-                if (mappedBy != null && !"".equals(mappedBy)) {
-                    relationShips.append("{" + mappedBy + "}");
-                }
-                relationShips.append("\n}\n\n");
-                */
-            } else {
-                // simple field
-                if (firstField) {
-                    firstField = false;
-                } else {
-                    out.append(",\n");
-                }
-                out.append("  " + fieldName + " " + getTypeName(isBlob, f) + (required ? " required" : "")
-                        + ( (min > -1) ? " " + getMinLabel(isBlob,f) + "(" + min + ")" : "")
-                        + ( (max > -1) ? " " + getMaxLable(isBlob,f) + "(" + max + ")" : "")
-                        + ( (pattern != null) ? " pattern(\"" + pattern + "\")": ""));
-            }
+            boolean wasGenerated = generateField(f, out, isFirstField, EMPTY_PREFIX);
+            if (isFirstField && wasGenerated) isFirstField = false;
         }
         out.append("\n");
         out.append("}\n\n");
     }
-    private String getMinLabel(final boolean isBlob, final Field f) {
-        if(isBlob) {
-            return "minbytes";
-        } else {
-            if( f.getType().equals(String.class)) {
-                return "minlength";
-            } else {
-                return "min";
+
+    private boolean generateEmbedded(final Class e, final StringBuilder out, final boolean firstField, final String prefix) {
+        boolean generatedFields = false;
+        boolean isFirstField = firstField;
+
+        if (isNull(e.getDeclaredAnnotation(Embeddable.class))) {
+            return false;
+        }
+        for (final Field f : e.getDeclaredFields()) {
+            boolean wasGenerated = generateField(f, out, isFirstField, prefix);
+            if (firstField && wasGenerated) {
+                generatedFields = true;
+            }
+            if (wasGenerated) {
+                isFirstField = false;
             }
         }
+        return generatedFields;
     }
-    private String getMaxLable(final boolean isBlob, final Field f) {
-        if(isBlob) {
-            return "maxbytes";
-        } else {
-            if( f.getType().equals(String.class)) {
-                return "maxlength";
-            } else {
-                return "max";
-            }
+
+    private boolean generateField(Field f, final StringBuilder out, final boolean firstField, final String prefix) {
+        if (f.isSynthetic() || Modifier.isStatic(f.getModifiers())) {
+            return false;
         }
-    }
-    private String getTypeName(final boolean isBlob, final Field f) {
-        if( isBlob) {
-            if( f.getType().equals(String.class)) {
-                return "TextBlob";
-            } else {
-                return "AnyBlob";
-            }
-        } else {
-            return f.getType().getSimpleName() ;
+        if (f.getDeclaredAnnotation(Transient.class) != null) {
+            return false;
         }
-    }
-    private Class<?> typeToClass(Type type) {
-        if (type instanceof Class) {
-            return (Class<?>) type;
-        } else if (type instanceof ParameterizedType) {
-            return typeToClass(((ParameterizedType) type).getRawType());
-        } else if (type instanceof GenericArrayType) {
-            Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            Class<?> componentClass = typeToClass(componentType);
-            if (componentClass != null) {
-                return Array.newInstance(componentClass, 0).getClass();
-            } else {
-                return null;
-            }
-        } else {
-            return null;
+        if (f.getDeclaredAnnotation(Id.class) != null) {
+            return false;
         }
+
+        if (f.getDeclaredAnnotation(Embedded.class) != null) {
+            return generateEmbedded(f.getType(), out, firstField, FieldDefinition.toDBName(f, prefix));
+        }
+
+        // TODO MONEY final Columns cols = f.getDeclaredAnnotation(Columns.class);
+
+
+        final Optional<RelationshipDefinition> relationship = RelationshipProcessor.process(f);
+        relationship.ifPresent(r -> {
+            final String targetEntityClassName = r.getTargetEntityClass()
+                .map(Class::getSimpleName)
+                .orElse("");
+
+            if (r.getRelationType().equals(RelationshipType.ManyToMany)) {
+                LOG.warn("ManyToMany .. mappedBy ??");
+            }
+            relations.addRelation(f.getType().getSimpleName(), f.getName(), targetEntityClassName, r.getMappedBy(), r.getRelationTypeName());
+        });
+
+        if (!relationship.isPresent()) {
+            final FieldDefinition fd = FieldProcessor.process(f);
+            fd.generateSimpleField(firstField, prefix, out);
+            return true;
+        }
+        return false;
     }
 }
