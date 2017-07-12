@@ -1,16 +1,19 @@
 package io.github.jhipster.jpa2jdl.example.entities.complex;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Embeddable;
 
 @Embeddable
+@NoArgsConstructor
+@Getter
+@Setter
 public class SimpleEmbeddableEntity {
 
     private String label;
     private Integer number;
-
-    public SimpleEmbeddableEntity() {
-        //HB
-    }
 
     public void setLabel(String label) {
         this.label = label;

@@ -1,11 +1,18 @@
 package io.github.jhipster.jpa2jdl.example.entities.complex;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 @Embeddable
+@NoArgsConstructor
+@Getter
+@Setter
 public class ComplexEmbeddableEntity {
 
     @Transient
@@ -18,19 +25,4 @@ public class ComplexEmbeddableEntity {
 
     private String amountLabel;
 
-    public ComplexEmbeddableEntity() {
-        //HB
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public SimpleEmbeddableEntity getInnerEntity() {
-        return innerEntity;
-    }
-
-    public String getAmountLabel() {
-        return amountLabel;
-    }
 }
