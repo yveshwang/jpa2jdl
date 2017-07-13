@@ -1,5 +1,7 @@
 package io.github.jhipster.jpa2jdl;
 
+import org.hibernate.annotations.Columns;
+
 import javax.persistence.Column;
 import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
@@ -8,6 +10,17 @@ import javax.validation.constraints.Size;
 import java.lang.reflect.Field;
 
 public class FieldProcessor {
+
+    public static CurrencyDefinition processCurrency(final Field f) {
+        return new CurrencyDefinition(FieldProcessor.process(f), f.getName());
+    }
+
+    public static MoneyDefinition processMoney(final Field f) {
+        final Columns columns = f.getDeclaredAnnotation(Columns.class);
+        final String currencyName = columns.columns()[0].name();
+        final String amountName = columns.columns()[1].name();
+        return new MoneyDefinition(FieldProcessor.process(f), currencyName, amountName);
+    }
 
     public static FieldDefinition process(final Field f) {
         boolean required = false;

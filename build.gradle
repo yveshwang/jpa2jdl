@@ -49,7 +49,7 @@ dependencies {
     compile "org.hibernate:hibernate-envers:5.2.8.Final"
     compile "com.fasterxml.jackson.core:jackson-annotations:2.8.9"
     compile 'com.google.guava:guava:21.0'
-
+    compile 'org.joda:joda-money:0.12'
     compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.16.16'
 }
 
