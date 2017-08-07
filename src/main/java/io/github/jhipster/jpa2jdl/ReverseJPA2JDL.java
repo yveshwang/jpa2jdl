@@ -1,5 +1,6 @@
 package io.github.jhipster.jpa2jdl;
 
+import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,9 +101,7 @@ public class ReverseJPA2JDL {
 
     public void generateClass2Jdl(final Class<?> e, final StringBuilder out) {
         boolean isFirstField = true;
-        if (isFirstField) {
-            out.append("entity " + e.getSimpleName() + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
-        }
+        out.append("entity " + e.getSimpleName() + " {\n"); // inheritance NOT SUPPORTED YET in JDL ???
 
         final Field[] declaredFields = e.getDeclaredFields();
         for(final Field f : declaredFields) {
@@ -132,7 +131,7 @@ public class ReverseJPA2JDL {
         return generatedFields;
     }
 
-    private boolean generateField(Field f, final StringBuilder out, final boolean firstField, final String prefix) {
+    private boolean generateField(final Field f, final StringBuilder out, final boolean firstField, final String prefix) {
         if (f.isSynthetic() || Modifier.isStatic(f.getModifiers())) {
             return false;
         }
@@ -147,7 +146,10 @@ public class ReverseJPA2JDL {
             return generateEmbedded(f.getType(), out, firstField, FieldDefinition.toDBName(f, prefix));
         }
 
-        // TODO MONEY final Columns cols = f.getDeclaredAnnotation(Columns.class);
+        final Type declaredAnnotation = f.getDeclaredAnnotation(Type.class);
+        if (declaredAnnotation != null) {
+            return generateType(f, declaredAnnotation, out, firstField, prefix);
+        }
 
 
         final Optional<RelationshipDefinition> relationship = RelationshipProcessor.process(f);
@@ -168,5 +170,25 @@ public class ReverseJPA2JDL {
             return true;
         }
         return false;
+    }
+
+    private boolean generateType(final Field f, final Type declaredAnnotation, final StringBuilder out, final boolean firstField, final String prefix) {
+        switch (declaredAnnotation.type()) {
+            case "org.jadira.usertype.moneyandcurrency.joda.PersistentCurrencyUnit" :
+                FieldProcessor
+                    .processCurrency(f)
+                    .generateCurrencyField(out, prefix, firstField);
+                return true;
+
+            case "org.jadira.usertype.moneyandcurrency.joda.PersistentMoneyAmountAndCurrency" :
+                FieldProcessor
+                    .processMoney(f)
+                    .generateMoneyField(out, prefix, firstField);
+                return true;
+
+            default:
+                LOG.warn("unrecognized type {}", declaredAnnotation.type());
+                return false;
+        }
     }
 }

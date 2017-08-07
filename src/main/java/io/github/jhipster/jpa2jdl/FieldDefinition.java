@@ -47,7 +47,11 @@ public class FieldDefinition {
     }
 
     public static String toDBName(final Field field, final String prefix) {
-        return StringUtils.isEmpty(prefix) ? field.getName() : prefix.concat(StringUtils.capitalize(field.getName()));
+        return toDBName(field.getName(), prefix);
+    }
+
+    public static String toDBName(final String name, final String prefix) {
+        return StringUtils.isEmpty(prefix) ? name : prefix.concat(StringUtils.capitalize(name));
     }
 
     public void generateSimpleField(final boolean firstField, final String prefix, StringBuilder out) {
