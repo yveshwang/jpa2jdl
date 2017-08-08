@@ -5,7 +5,10 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import javax.persistence.Entity;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,6 +32,9 @@ public class NewRunner {
 
     @Option(name="--archiveRoot", required = false)
     private String archiveRoot = "/";
+
+    @Option(name="--out", required = true)
+    private String outputpath;
 
     public static void main(String[] args) {
         Arrays.stream(args).forEach(System.out::println);
@@ -96,6 +102,25 @@ public class NewRunner {
         }
 
         // run the job
-        System.out.println(jpa2jdl.generate(entitySubClasses, enums));
+        final String text = jpa2jdl.generate(entitySubClasses, enums);
+        if( outputpath == null) {
+            System.out.println(text);
+        } else {
+            try {
+                write(text, outputpath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    private void write(final String text, final String fullPath) throws IOException {
+        try(final OutputStreamWriter output = new OutputStreamWriter(
+            new FileOutputStream(fullPath), "UTF-8");
+            final BufferedWriter buffered =
+                new BufferedWriter(output)) {
+            buffered.write(text);
+        }
     }
 }
