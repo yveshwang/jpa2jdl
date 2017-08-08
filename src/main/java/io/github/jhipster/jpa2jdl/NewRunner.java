@@ -53,8 +53,6 @@ public class NewRunner {
     }
 
     private void run(){
-        System.out.println("file: " + archiveFile);
-        System.out.println("package: " + rootPackage);
 
         final Set<Class<?>> entitySubClasses = new HashSet<>();
         final Set<Class<?>> enums = new HashSet<>();
@@ -63,7 +61,7 @@ public class NewRunner {
             Enumeration<JarEntry> e = jarFile.entries();
 
             final URL[] urls          = { new URL("jar:file:" + archiveFile + "!" + archiveRoot) };
-            final URLClassLoader cl   = URLClassLoader.newInstance(urls);
+            final URLClassLoader cl   = URLClassLoader.newInstance(urls, NewRunner.class.getClassLoader());
 
             while (e.hasMoreElements()) {
                 final JarEntry je = e.nextElement();
