@@ -1,5 +1,3 @@
-import org.omg.CORBA.Environment
-
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'pmd'
@@ -57,9 +55,7 @@ dependencies {
 }
 
 task execute(type: JavaExec, dependsOn: 'prep') {
-//    print System.getProperty("args").split("--archive=")[1].split(" --package")[0]
     classpath = sourceSets.main.runtimeClasspath
-//    classpath += files(System.getProperty("args").split("--archive=")[1].split(" --package")[0])
     main = project.hasProperty("mainClass") ? project.getProperty("mainClass") : "io.github.jhipster.jpa2jdl.NewRunner"
 }
 
@@ -71,8 +67,8 @@ task('prep') {
             println execute.args
         } else {
             println 'No args supplied.'
-            println 'Usage1 for simple jar: gradle execute -Dargs=\'--archive=/some/dir/to/archive.jar --package=io.github.jhipster.jpa2jdl.example.entities\''
-            println 'Usage2 for executable jars: gradle execute -Dargs=\'--archive=/some/dir/to/archive.jar --archiveRoot=/BOOT-INF/classes/ --package=io.github.jhipster.jpa2jdl.example.entities\''
+            println 'Usage1 for simple jar: gradle execute -Dargs=\"--archive=/some/dir/to/archive.jar --package=io.github.jhipster.jpa2jdl.example.entities\''
+            println 'Usage2 for executable jars: gradle execute -Dargs=\'--archive=/some/dir/to/archive.jar --archiveRoot=/BOOT-INF/classes/ --package=io.github.jhipster.jpa2jdl.example.entities --out=$(pwd)/example.jh\"'
             execute.enabled = false
         }
     }
