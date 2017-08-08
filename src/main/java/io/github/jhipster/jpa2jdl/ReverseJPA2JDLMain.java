@@ -1,5 +1,9 @@
 package io.github.jhipster.jpa2jdl;
 
+import nl.javadude.scannit.Configuration;
+import nl.javadude.scannit.Scannit;
+import nl.javadude.scannit.scanner.SubTypeScanner;
+import nl.javadude.scannit.scanner.TypeAnnotationScanner;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -12,10 +16,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -28,7 +35,7 @@ public class ReverseJPA2JDLMain {
     @Option(name = "--package", required = true)
     private String rootPackage;
 
-    @Option(name = "--archive", required = true)
+    @Option(name = "--archive")
     private String archiveFile;
 
     @Option(name = "--archiveRoot")
@@ -51,10 +58,63 @@ public class ReverseJPA2JDLMain {
         app.run();
     }
 
-    private void run() {
+    public static Set<Class<?>> packageNameToClasses(final String name) {
+        final Configuration config = Configuration.config()
+            .with(new SubTypeScanner(), new TypeAnnotationScanner())
+            .scan(name);
+        final Scannit scannit = new Scannit(config);
+        final Set<Class<?>> entityClasses = scannit.getTypesAnnotatedWith(Entity.class);
         final Set<Class<?>> entitySubClasses = new HashSet<>();
-        final Set<Class<?>> enums = new HashSet<>();
+        entitySubClasses.addAll(entityClasses);
+        for (final Class<?> e : entityClasses) {
+            final Set<Class<?>> subClasses = (Set<Class<?>>) scannit.getSubTypesOf(e);
+            if (subClasses != null && !subClasses.isEmpty()) {
+                entitySubClasses.addAll(subClasses);
+            }
+        }
 
+        LOG.info("Found @Entity classes:" + entityClasses.size() + " : " + entityClasses);
+        if (entitySubClasses.size() > entityClasses.size()) {
+            LOG.info("Found sub-classes of @Entity classes:" + entitySubClasses.size() + " : " + entitySubClasses);
+        }
+        return entitySubClasses;
+    }
+
+    public static Set<Class<?>> filterOutEnums(Set<Class<?>> entitySubClasses) {
+        // scan enum types in entities field type
+        final Set<Class<?>> enums = new LinkedHashSet<>();
+        for (Class<?> e : entitySubClasses) {
+            final Field[] declaredFields = e.getDeclaredFields();
+            for (final Field f : declaredFields) {
+                final Class<?> fieldType = f.getType();
+                if (fieldType.isEnum()) {
+                    if (f.isSynthetic() || Modifier.isStatic(f.getModifiers())) {
+                        continue;
+                    }
+                    enums.add(fieldType);
+                }
+            }
+        }
+        return enums;
+    }
+
+    private void run() {
+        if (Objects.isNull(archiveFile)) {
+            final Set<Class<?>> entitySubClasses = packageNameToClasses(rootPackage);
+            final Set<Class<?>> enums = filterOutEnums(entitySubClasses);
+
+
+            generate(entitySubClasses, enums);
+        } else {
+            final Set<Class<?>> entitySubClasses = new HashSet<>();
+            final Set<Class<?>> enums = new HashSet<>();
+
+            collectClassesFromArchiveFile(entitySubClasses, enums);
+            generate(entitySubClasses, enums);
+        }
+    }
+
+    private void collectClassesFromArchiveFile(Set<Class<?>> entitySubClasses, Set<Class<?>> enums) {
         try (final JarFile jarFile = new JarFile(archiveFile)) {
             final Enumeration<JarEntry> entry = jarFile.entries();
             final URL[] urls = {new URL("jar:file:" + archiveFile + "!" + archiveRoot)};
@@ -69,7 +129,7 @@ public class ReverseJPA2JDLMain {
                 final String className = je.getName()
                     .substring(0, je.getName().length() - 6)
                     // because of archiveRoot
-                    .substring(archiveRoot.length()-1)
+                    .substring(archiveRoot.length() - 1)
                     .replace('/', '.');
 
                 if (!(className.startsWith(rootPackage))) {
@@ -95,7 +155,9 @@ public class ReverseJPA2JDLMain {
         } catch (final IOException e) {
             LOG.error("Cannot read from archive", e);
         }
+    }
 
+    private void generate(final Set<Class<?>> entitySubClasses, final Set<Class<?>> enums) {
         // run the job
         final String text = jpa2jdl.generate(entitySubClasses, enums);
         if (outputpath == null) {
