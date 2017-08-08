@@ -21,11 +21,14 @@ public class NewRunner {
 
     private ReverseJPA2JDL jpa2jdl = new ReverseJPA2JDL();
 
-    @Option(name="--package")
+    @Option(name="--package", required = true)
     private String rootPackage;
 
-    @Option(name="--archive")
+    @Option(name="--archive", required = true)
     private String archiveFile;
+
+    @Option(name="--archiveRoot", required = false)
+    private String archiveRoot = "/";
 
     public static void main(String[] args) {
         Arrays.stream(args).forEach(System.out::println);
@@ -53,7 +56,7 @@ public class NewRunner {
         try (final JarFile jarFile = new JarFile(archiveFile)) {
             Enumeration<JarEntry> e = jarFile.entries();
 
-            final URL[] urls          = { new URL("jar:file:" + archiveFile + "!/BOOT-INF/classes/") };
+            final URL[] urls          = { new URL("jar:file:" + archiveFile + "!" + archiveRoot) };
             final URLClassLoader cl   = URLClassLoader.newInstance(urls);
 
             while (e.hasMoreElements()) {
