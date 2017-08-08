@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/yveshwang/jpa2jdl.svg?branch=master)](https://travis-ci.org/yveshwang/jpa2jdl)
+
 Title: 		jpa2jdl  
 Author: 	@yveshwang  
 Date: 		20.06.2017  
