@@ -1,5 +1,11 @@
 package io.github.jhipster.jpa2jdl;
 
+import io.github.jhipster.jpa2jdl.field.FieldDefinition;
+import io.github.jhipster.jpa2jdl.field.FieldProcessor;
+import io.github.jhipster.jpa2jdl.relationship.RelationsCache;
+import io.github.jhipster.jpa2jdl.relationship.RelationshipDefinition;
+import io.github.jhipster.jpa2jdl.relationship.RelationshipProcessor;
+import io.github.jhipster.jpa2jdl.relationship.RelationshipType;
 import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
