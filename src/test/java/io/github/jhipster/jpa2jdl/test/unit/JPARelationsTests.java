@@ -4,6 +4,8 @@ import io.github.jhipster.jpa2jdl.ReverseJPA2JDL;
 import io.github.jhipster.jpa2jdl.ReverseJPA2JDLMain;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -12,6 +14,7 @@ import java.util.Set;
  */
 public class JPARelationsTests {
 
+    private static final Logger LOG = LoggerFactory.getLogger(JPARelationsTests.class);
     private static final String TEST_PACKAGE_NAME = "io.github.jhipster.jpa2jdl.example.entities.relations";
     private static Set<Class<?>> CLASSES;
     private static Set<Class<?>> ENUMS;

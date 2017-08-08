@@ -1,6 +1,6 @@
 package io.github.jhipster.jpa2jdl.test.unit;
 
-import io.github.jhipster.jpa2jdl.RelationsCache;
+import io.github.jhipster.jpa2jdl.relationship.RelationsCache;
 import org.junit.Assert;
 import org.junit.Test;
 

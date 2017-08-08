@@ -1,4 +1,4 @@
-package io.github.jhipster.jpa2jdl;
+package io.github.jhipster.jpa2jdl.relationship;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package io.github.jhipster.jpa2jdl;
+package io.github.jhipster.jpa2jdl.field;
 
 import org.hibernate.annotations.Columns;
 
