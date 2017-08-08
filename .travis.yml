@@ -1,0 +1,6 @@
+language: java
+sudo: false
+disty: trusty
+jdk:
+  - openjdk8
+
