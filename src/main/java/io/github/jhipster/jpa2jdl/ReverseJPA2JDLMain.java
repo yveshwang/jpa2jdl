@@ -26,9 +26,9 @@ import java.util.Set;
  */
 public class ReverseJPA2JDLMain {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseJPA2JDLMain.class);
-    @Option(name="--packageName")
+    @Option(name="--packageName", metaVar = "io.github.jhipster", required = true, usage="Set the top package name to scan for @Entity annotation")
     private String packageName;
-    @Option(name="--out")
+    @Option(name="--out", metaVar = "\"~/example.jdl\"", usage="Write JDL to designated output file")
     private String outputpath;
     private ReverseJPA2JDL jpa2jdl = new ReverseJPA2JDL();
     public static void main(String[] args) {
@@ -38,10 +38,9 @@ public class ReverseJPA2JDLMain {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
             // handling of wrong arguments
-            System.err.println(e.getMessage());
             parser.printUsage(System.err);
+            System.exit(1);
         }
-        app.run();
     }
     public static Set<Class<?>> packageNameToClasses(final String name) {
         final Configuration config = Configuration.config()
