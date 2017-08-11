@@ -58,6 +58,7 @@ public class ReverseJPA2JDLMain {
         app.run();
     }
 
+    @SuppressWarnings("unchecked")
     public static Set<Class<?>> packageNameToClasses(final String name) {
         final Configuration config = Configuration.config()
             .with(new SubTypeScanner(), new TypeAnnotationScanner())
