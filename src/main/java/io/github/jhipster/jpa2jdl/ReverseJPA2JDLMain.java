@@ -32,16 +32,16 @@ public class ReverseJPA2JDLMain {
     private static final Logger LOG = LoggerFactory.getLogger(ReverseJPA2JDLMain.class);
     private ReverseJPA2JDL jpa2jdl = new ReverseJPA2JDL();
 
-    @Option(name = "--package", required = true)
+    @Option(name = "--package", required = true, usage = "Specify the package name to scan for classes annoated with @Entity.", metaVar = "io.github.jhipster")
     private String rootPackage;
 
-    @Option(name = "--archive")
+    @Option(name = "--archive", required = false, usage = "Specify the a single explicit jar for scanning.", metaVar = "/some/dir/to/archive.jar")
     private String archiveFile;
 
-    @Option(name = "--archiveRoot")
+    @Option(name = "--archiveRoot", required = false, usage = "Specify the root of the classes within an executable jar for example.", metaVar = "/BOOT-INF/classes/")
     private String archiveRoot = "/";
 
-    @Option(name = "--out")
+    @Option(name = "--out", required = false, usage = "Specify the output JDL file to be written.", metaVar = "\"~/example.jh\"")
     private String outputpath;
 
     public static void main(String[] args) {
@@ -51,7 +51,7 @@ public class ReverseJPA2JDLMain {
             parser.parseArgument(args);
         } catch (final CmdLineException e) {
             // handling of wrong arguments
-            LOG.error("Error while processing program arguments", e);
+            System.err.println(e.getMessage());
             parser.printUsage(System.err);
             System.exit(1);
         }
@@ -137,7 +137,7 @@ public class ReverseJPA2JDLMain {
                 }
 
                 try {
-                    final Class c = cl.loadClass(className);
+                    final Class<?> c = cl.loadClass(className);
                     if (c.isEnum()) {
                         enums.add(c);
                     }

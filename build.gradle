@@ -1,3 +1,4 @@
+apply plugin: 'application'
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'pmd'
@@ -67,9 +68,31 @@ task('prep') {
             println execute.args
         } else {
             println 'No args supplied.'
-            println 'Usage1 for simple jar: gradle execute -Dargs=\"--archive=/some/dir/to/archive.jar --package=io.github.jhipster.jpa2jdl.example.entities\''
-            println 'Usage2 for executable jars: gradle execute -Dargs=\'--archive=/some/dir/to/archive.jar --archiveRoot=/BOOT-INF/classes/ --package=io.github.jhipster.jpa2jdl.example.entities --out=$(pwd)/example.jh\"'
+            println 'For simple jar: gradle execute -Dargs=\"--archive /some/dir/to/archive.jar --package io.github.jhipster.jpa2jdl.example.entities\"'
+            println 'For executable jars: gradle execute -Dargs=\"--archive /some/dir/to/archive.jar --archiveRoot /BOOT-INF/classes/ --package io.github.jhipster.jpa2jdl.example.entities --out $(pwd)/example.jh\"'
             execute.enabled = false
         }
     }
 }
+
+compileJava {
+    options.fork = false
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:all,-processing" << "-Werror"
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+compileTestJava {
+    options.encoding = 'UTF-8'
+}
+
+task('javaSettings').doLast({ task ->
+    println "$task.project.name"
+    println "fork=$task.project.compileJava.options.fork"
+    println "encoding=$task.project.compileJava.options.encoding"
+    println "source=$task.project.compileJava.sourceCompatibility"
+    println "target=$task.project.compileJava.targetCompatibility"
+})
+
+

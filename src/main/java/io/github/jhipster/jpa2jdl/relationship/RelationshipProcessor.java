@@ -60,7 +60,7 @@ public class RelationshipProcessor {
         return Optional.empty();
     }
 
-    private static Class<?> resolveTargetEntityClass(final Field f, final Class targetEntityClass, final RelationshipType type) {
+    private static Class<?> resolveTargetEntityClass(final Field f, final Class<?> targetEntityClass, final RelationshipType type) {
         Class<?> result = targetEntityClass;
         if (targetEntityClass == void.class || targetEntityClass == null) {
             result = typeToClass(f.getType());

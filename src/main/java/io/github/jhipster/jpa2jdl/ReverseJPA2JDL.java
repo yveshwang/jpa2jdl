@@ -118,7 +118,7 @@ public class ReverseJPA2JDL {
         out.append("}\n\n");
     }
 
-    private boolean generateEmbedded(final Class e, final StringBuilder out, final boolean firstField, final String prefix) {
+    private boolean generateEmbedded(final Class<?> e, final StringBuilder out, final boolean firstField, final String prefix) {
         boolean generatedFields = false;
         boolean isFirstField = firstField;
 
